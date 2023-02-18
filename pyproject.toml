@@ -29,6 +29,15 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 80
+exclude = '''
+(
+    migrations
+    | .mypy_cache
+    | .pytest_cache
+    | .tox
+    | venv
+)
+'''
 
 [tool.isort]
 include_trailing_comma = true
