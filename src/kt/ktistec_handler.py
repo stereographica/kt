@@ -1,6 +1,6 @@
-from bs4 import BeautifulSoup
 import click
 import requests
+from bs4 import BeautifulSoup
 
 from kt.profile import ProfileConfig
 from kt.util import Logger

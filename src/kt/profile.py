@@ -5,6 +5,7 @@ from tomllib import TOMLDecodeError
 
 import click
 import toml
+from tabulate import tabulate
 
 from kt.util import Logger
 
@@ -27,46 +28,76 @@ class ProfileConfig:
 
 
 class Profile:
-    def __init__(self):
+    def __init__(self) -> None:
         self._profile_path = f"{os.path.expanduser('~')}/.kt/profile"
 
-    def load(self, profile_name: str | None = None) -> ProfileConfig:
+    def loads(self) -> dict[str, ProfileConfig]:
         try:
             with open(self._profile_path, "rb") as f:
-                profiles: dict[str, dict[str, dict[str, str]]] = tomllib.load(f)
+                toml_data: dict[str, dict[str, dict[str, str]]] = tomllib.load(
+                    f
+                )
+
+            return {
+                profile_name: ProfileConfig(**profile)
+                for profile_name, profile in toml_data["profiles"].items()
+            }
+
         except FileNotFoundError:
-            raise ProfileNotFoundException("Profile not found.")
+            raise ProfileNotFoundException("Config file not found.")
         except TOMLDecodeError:
             raise ProfileException("Bad toml file.")
-        except:
+        except Exception:
             logger.exception("Unknown Error")
             raise ProfileException("Unknown error.")
 
+    def load(self, profile_name: str | None = None) -> ProfileConfig:
+        profiles = self.loads()
+
         if profile_name:
             try:
-                return ProfileConfig(**profiles["profiles"][profile_name])
+                return profiles[profile_name]
             except KeyError:
-                raise ProfileException("Specified profile name not found in config.")
+                raise ProfileException(
+                    "Specified profile name not found in config."
+                )
             except TypeError:
                 raise ProfileException("Invalid profile format.")
-            except:
+            except Exception:
                 logger.exception("Unknown Error")
                 raise ProfileException("Unknown error.")
         else:
             try:
-                default = [n for n in profiles["profiles"].keys() if n.endswith("default")][0]
-                return ProfileConfig(**profiles["profiles"][default])
+                default = [n for n in profiles.keys() if n.endswith("default")][
+                    0
+                ]
+                return profiles[default]
             except IndexError:
                 raise ProfileException(
                     "Default profile config not found. You can configure profile by running `kt --init`"
                 )
             except TypeError:
                 raise ProfileException("Invalid profile format.")
-            except:
+            except Exception:
                 logger.exception("Unknown Error")
                 raise ProfileException("Unknown error.")
 
-    def init(self, ctx: click.Context):
+    def _save_toml(self, data: dict[str, ProfileConfig]) -> None:
+        os.makedirs(self._profile_path[:-8], exist_ok=True)
+        toml.dump(
+            {
+                "profiles": {
+                    profile_name: asdict(profile)
+                    for profile_name, profile in data.items()
+                }
+            },
+            open(self._profile_path, "w"),
+        )
+
+    def save(
+        self,
+        ctx: click.Context,
+    ) -> None:
         def prompt_server_url(ctx: click.Context, value: str | None = None):
             msg = "ktistec server url: "
             input = ""
@@ -85,6 +116,12 @@ class Profile:
                 )
                 return prompt_server_url(ctx, click.prompt(msg))
 
+        profiles: dict[str, ProfileConfig] = {}
+        try:
+            profiles = self.loads()
+        except FileNotFoundError:
+            pass
+
         profile_name = click.prompt(
             "profile name: ",
         )
@@ -93,11 +130,45 @@ class Profile:
             "user name: ",
         )
         password = click.prompt("password: ", hide_input=True)
-        profile = ProfileConfig(server_url=server_url, user_name=user_name, password=password)
-
-        os.makedirs(self._profile_path[:-8], exist_ok=True)
-        toml.dump(
-            {"profiles": {profile_name + ":default": asdict(profile)}},
-            open(self._profile_path, "w"),
+        profile = ProfileConfig(
+            server_url=server_url, user_name=user_name, password=password
         )
-        click.echo("\nProfile saved.")
+
+        profiles[profile_name] = profile
+        self._save_toml(profiles)
+
+        click.echo(f"Profile `{profile_name}` saved.")
+
+    def remove(self, name: str) -> None:
+        try:
+            profiles = self.loads()
+        except ProfileNotFoundException | ProfileException as e:
+            raise e
+
+        if name not in profiles:
+            raise ProfileException(
+                "Specified profile name not found in config."
+            )
+
+        click.confirm(f"Do you really want to remove profile `{name}` ?")
+
+        del profiles[name]
+        self._save_toml(profiles)
+
+        click.echo(f"Profile `{name}` removed.")
+
+    def list_profile(self) -> None:
+        try:
+            profiles = self.loads()
+        except ProfileNotFoundException | ProfileException as e:
+            raise e
+
+        click.echo(
+            tabulate(
+                [
+                    [name, profile.server_url, profile.user_name]
+                    for name, profile in profiles.items()
+                ],
+                ["Profile Name", "Server URL", "User Name"],
+            )
+        )
