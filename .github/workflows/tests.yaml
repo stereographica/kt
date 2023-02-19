@@ -29,7 +29,10 @@ jobs:
           poetry run flake8 src tests
       - name: Test type with mypy
         run: |
-          poetry run mypy src tests
+          poetry run mypy src
+      - name: Test type with mypy tests
+        run: |
+          poetry run mypy tests
       - name: Test format with black and isort
         run: |
           poetry run black --check src tests
