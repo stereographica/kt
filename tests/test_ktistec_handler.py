@@ -7,8 +7,8 @@ import pytest
 import requests_mock
 from requests import Session
 
-from kt.ktistec_handler import KtistecHandler, KtistecHandlerException
-from kt.profile import ProfileConfig
+from src.kt.ktistec_handler import KtistecHandler, KtistecHandlerException
+from src.kt.profile import ProfileConfig
 
 
 class TestKtistecHandler:

@@ -8,7 +8,7 @@ import click
 import toml
 from tabulate import tabulate
 
-from kt.util import Logger
+from .util import Logger
 
 logger = Logger().get_logger()
 

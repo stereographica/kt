@@ -1,4 +1,4 @@
-from kt.util import Logger
+from src.kt.util import Logger
 
 
 class TestUtil:

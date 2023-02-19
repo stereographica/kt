@@ -2,8 +2,8 @@ import click
 import requests
 from bs4 import BeautifulSoup
 
-from kt.profile import ProfileConfig
-from kt.util import Logger
+from .profile import ProfileConfig
+from .util import Logger
 
 logger = Logger().get_logger()
 

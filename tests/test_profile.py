@@ -5,7 +5,7 @@ from unittest.mock import Mock, mock_open, patch
 import click
 import pytest
 
-from kt.profile import (
+from src.kt.profile import (
     Profile,
     ProfileConfig,
     ProfileException,
@@ -74,7 +74,7 @@ class TestProfile:
     def test_load_specify_profile_name_success(self, dummy_profile_configs):
         mock_loads = Mock()
         mock_loads.return_value = dummy_profile_configs
-        with patch("kt.profile.Profile.loads", mock_loads):
+        with patch("src.kt.profile.Profile.loads", mock_loads):
             target = Profile()
             res = target.load("bar")
             assert res == dummy_profile_configs["bar"]
@@ -84,7 +84,7 @@ class TestProfile:
     ):
         mock_loads = Mock()
         mock_loads.return_value = dummy_profile_configs
-        with patch("kt.profile.Profile.loads", mock_loads):
+        with patch("src.kt.profile.Profile.loads", mock_loads):
             target = Profile()
             res = target.load("foo")
             assert res == dummy_profile_configs["foo:default"]
@@ -92,7 +92,7 @@ class TestProfile:
     def test_load_specify_profile_name_not_found(self, dummy_profile_configs):
         mock_loads = Mock()
         mock_loads.return_value = dummy_profile_configs
-        with patch("kt.profile.Profile.loads", mock_loads):
+        with patch("src.kt.profile.Profile.loads", mock_loads):
             target = Profile()
             with pytest.raises(ProfileException) as e:
                 target.load("baz")
@@ -101,7 +101,7 @@ class TestProfile:
     def test_load_default_profile_success(self, dummy_profile_configs):
         mock_loads = Mock()
         mock_loads.return_value = dummy_profile_configs
-        with patch("kt.profile.Profile.loads", mock_loads):
+        with patch("src.kt.profile.Profile.loads", mock_loads):
             target = Profile()
             res = target.load()
             assert res == dummy_profile_configs["foo:default"]
@@ -110,7 +110,7 @@ class TestProfile:
         mock_loads = Mock()
         mock_loads.return_value = dummy_profile_configs
         del dummy_profile_configs["foo:default"]
-        with patch("kt.profile.Profile.loads", mock_loads):
+        with patch("src.kt.profile.Profile.loads", mock_loads):
             target = Profile()
             with pytest.raises(ProfileException) as e:
                 target.load()

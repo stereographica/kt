@@ -1,7 +1,7 @@
 import click
 
-from kt.ktistec_handler import KtistecHandler
-from kt.profile import Profile, ProfileNotFoundException
+from .ktistec_handler import KtistecHandler
+from .profile import Profile, ProfileNotFoundException
 
 __all__ = ["main"]
 
