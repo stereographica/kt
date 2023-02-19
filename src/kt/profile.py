@@ -1,5 +1,6 @@
 import os
 import tomllib
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from tomllib import TOMLDecodeError
 
@@ -7,7 +8,7 @@ import click
 import toml
 from tabulate import tabulate
 
-from kt.util import Logger
+from .util import Logger
 
 logger = Logger().get_logger()
 
@@ -47,25 +48,21 @@ class Profile:
             raise ProfileNotFoundException("Config file not found.")
         except TOMLDecodeError:
             raise ProfileException("Bad toml file.")
-        except Exception:
-            logger.exception("Unknown Error")
-            raise ProfileException("Unknown error.")
 
     def load(self, profile_name: str | None = None) -> ProfileConfig:
         profiles = self.loads()
 
         if profile_name:
             try:
-                return profiles[profile_name]
+                if f"{profile_name}:default" in profiles:
+                    return profiles[f"{profile_name}:default"]
+                else:
+                    return profiles[profile_name]
             except KeyError:
                 raise ProfileException(
                     "Specified profile name not found in config."
                 )
-            except TypeError:
-                raise ProfileException("Invalid profile format.")
-            except Exception:
-                logger.exception("Unknown Error")
-                raise ProfileException("Unknown error.")
+
         else:
             try:
                 default = [n for n in profiles.keys() if n.endswith("default")][
@@ -74,13 +71,8 @@ class Profile:
                 return profiles[default]
             except IndexError:
                 raise ProfileException(
-                    "Default profile config not found. You can configure profile by running `kt --init`"
+                    "Default profile config not found. You can configure profile by running `ktctl profile`"
                 )
-            except TypeError:
-                raise ProfileException("Invalid profile format.")
-            except Exception:
-                logger.exception("Unknown Error")
-                raise ProfileException("Unknown error.")
 
     def _save_toml(self, data: dict[str, ProfileConfig]) -> None:
         os.makedirs(self._profile_path[:-8], exist_ok=True)
@@ -112,14 +104,15 @@ class Profile:
                     return input
             except ValueError:
                 click.echo(
-                    "\nValidation Error: Server URL must be start with protocol [http://|https://]\n"
+                    "\nValidation Error: Server URL must be start with protocol [http://|https://]\n",
+                    err=True,
                 )
                 return prompt_server_url(ctx, click.prompt(msg))
 
         profiles: dict[str, ProfileConfig] = {}
         try:
             profiles = self.loads()
-        except FileNotFoundError:
+        except ProfileNotFoundException:
             pass
 
         profile_name = click.prompt(
@@ -140,28 +133,27 @@ class Profile:
         click.echo(f"Profile `{profile_name}` saved.")
 
     def remove(self, name: str) -> None:
-        try:
-            profiles = self.loads()
-        except ProfileNotFoundException | ProfileException as e:
-            raise e
+        profiles = self.loads()
 
-        if name not in profiles:
+        name_to_show = deepcopy(name)
+        if f"{name}:default" in profiles:
+            name = f"{name}:default"
+        elif name not in profiles:
             raise ProfileException(
                 "Specified profile name not found in config."
             )
 
-        click.confirm(f"Do you really want to remove profile `{name}` ?")
+        if click.confirm(
+            f"Do you really want to remove profile `{name_to_show}` ?"
+        ):
 
-        del profiles[name]
-        self._save_toml(profiles)
+            del profiles[name]
+            self._save_toml(profiles)
 
-        click.echo(f"Profile `{name}` removed.")
+            click.echo(f"Profile `{name_to_show}` removed.")
 
     def list_profile(self) -> None:
-        try:
-            profiles = self.loads()
-        except ProfileNotFoundException | ProfileException as e:
-            raise e
+        profiles = self.loads()
 
         click.echo(
             tabulate(
@@ -172,3 +164,42 @@ class Profile:
                 ["Profile Name", "Server URL", "User Name"],
             )
         )
+
+    def set_default(self, ctx: click.Context, name: str) -> None:
+        profiles = self.loads()
+        default = None
+
+        try:
+            default = [n for n in profiles.keys() if n.endswith("default")][0]
+        except IndexError:
+            pass
+
+        if name not in profiles and f"{name}:default" not in profiles:
+            raise ProfileException("Specified profile not found.")
+
+        if default:
+            if name == default.split(":")[0]:
+                raise ProfileException(
+                    "Specified profile name is already set as default."
+                )
+            if click.confirm(
+                f"Profile {default.split(':')[0]} is already set as default.\nDo you want to set profile {name} as default?"
+            ):
+                p = deepcopy(profiles)
+                del profiles[name]
+                profiles[f"{name}:default"] = p[name]
+                del profiles[default]
+                profiles[default.split(":")[0]] = p[default]
+
+                self._save_toml(profiles)
+            else:
+                ctx.exit(0)
+        else:
+
+            p = deepcopy(profiles)
+            del profiles[name]
+            profiles[f"{name}:default"] = p[name]
+
+            self._save_toml(profiles)
+
+        click.echo(f"Set profile `{name}` as default.")

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <meta content='width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,shrink-to-fit=no' name='viewport'>
+        <meta name="theme-color" content="#ffffff">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+        <link rel="manifest" href="/site.webmanifest">
+        <title>stereographica::pub</title>
+        <link rel="stylesheet" href="/3rd/semantic-2.4.1.min.css"/>
+        <script>
+          window.Ktistec = {
+            csrf: 'beb886633614303dd2c5774a25a347ee'
+          }
+        </script>
+        <script src="/dist/site.bundle.js"></script>
+        
+    </head>
+    <body class="dimmable">
+        <div class="ui basic tiny delete modal"><div class="header"><i class="trash icon"></i>Delete This Post</div><div class="content"><p>This action will delete this post on this instance and on all
+federated instances, and it cannot be undone. Are you certain
+you want to delete this post?</p></div><div class="actions"><div class="ui red basic cancel inverted button"><i class="remove icon"></i>No</div><div class="ui green ok inverted button"><i class="checkmark icon"></i>Yes</div></div></div><div class="ui basic tiny block actor modal"><div class="header"><i class="user times icon"></i>Block This Actor</div><div class="content"><p>This action will block this actor and hide all of their past
+and future posts. Are you certain you want to block this
+actor?</p></div><div class="actions"><div class="ui red basic cancel inverted button"><i class="remove icon"></i>No</div><div class="ui green ok inverted button"><i class="checkmark icon"></i>Yes</div></div></div><div class="ui basic tiny block object modal"><div class="header"><i class="times icon"></i>Block This Object</div><div class="content"><p>This action will block this object. Are you certain you want
+to block this object?</p></div><div class="actions"><div class="ui red basic cancel inverted button"><i class="remove icon"></i>No</div><div class="ui green ok inverted button"><i class="checkmark icon"></i>Yes</div></div></div>
+        <nav class="ui top fixed inverted navigation menu"><div class="ui text container"><a class="item" href="/">Home</a><div class="right menu"><a class="item" href="/sessions">Sign In</a></div></div></nav>
+        <div class="ui text container">
+            <h1>Sign In</h1><form class="ui form" action="/sessions" method="POST"><input type="hidden" name="authenticity_token" value="beb886633614303dd2c5774a25a347ee"><div class="field"><label>Username</label><input class="" type="text" name="username" value=""></div><div class="field"><label>Password</label><input class="" type="password" name="password" value=""></div><input class="ui primary button" type="submit" value="Sign In"></form><p class="small text">Ktistec Version 2.0.0-8</p>
+        </div>
+        <nav class="ui bottom forced inverted menu"><div class="ui text container"><span class="link item"><a href='https://github.com/toddsundsted/ktistec' target='_blank'>Powered by <em>Ktistec</em>.</a></span></div></nav>
+    </body>
+</html>

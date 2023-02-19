@@ -1,0 +1,49 @@
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: |
+          pip install poetry
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      - name: Poetry Install Dependencies
+        run: |
+          poetry config experimental.new-installer false
+          poetry install  --no-interaction
+      - name: Lint with flake8
+        run: |
+          poetry run flake8 src tests
+      - name: Test type with mypy
+        run: |
+          poetry run mypy src
+      - name: Test type with mypy tests
+        run: |
+          poetry run mypy tests
+      - name: Test format with black and isort
+        run: |
+          poetry run black --check src tests
+          poetry run isort --check-only src tests
+      - name: Test with pytest
+        run: |
+          poetry run pytest -v --cov=src --cov-report=term-missing --junitxml=junit/test-results.xml  --cov-report=html
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
