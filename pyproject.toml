@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "kt"
-version = "0"
+version = "0.3.0"
 description = ""
 authors = ["stereographica <stereographica@gmail.com>"]
 readme = "README.md"
+packages = [{include = "src/kt"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -32,9 +33,6 @@ types-tabulate = "^0.9.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry-version-plugin]
-source = "git-tag"
 
 [tool.black]
 line-length = 80
