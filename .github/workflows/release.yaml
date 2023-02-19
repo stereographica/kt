@@ -2,9 +2,8 @@ name: Release
 
 on:
   push:
-    # branches to consider in the event; optional, defaults to all
-    branches:
-      - main
+    tags:
+      - '*.*.*'
 
 jobs:
   release:
