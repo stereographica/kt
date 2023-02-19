@@ -1,22 +1,31 @@
+import os
+import tempfile
+from subprocess import call
+
 import click
 
 from .ktistec_handler import KtistecHandler
+from .message_builder import MessageBuilder
 from .profile import Profile, ProfileNotFoundException
 
 __all__ = ["main"]
 
+EDITOR = os.environ.get("EDITOR", "vim")
+
+initial_message = ""
+
 
 @click.command()
-@click.argument("message")
-@click.option("--link", "-l", multiple=True)
+@click.option("--post", "-p", type=str)
+@click.option("--edit", "-e", is_flag=True)
 @click.option("--debug", is_flag=True)
 @click.option("--profile", type=str)
 @click.pass_context
 def main(
     ctx: click.Context,
-    message: str,
-    link: list[str],
+    post: str | None,
     profile: str | None,
+    edit: bool,
     debug: bool,
 ) -> None:
     # check profile exists
@@ -31,9 +40,33 @@ def main(
         click.echo(str(e))
         ctx.exit(1)
 
+    post_message = ""
+
+    if not post and not edit:
+        click.echo("Please input post content.")
+        ctx.exit(1)
+
+    if edit:
+        with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+            tf.write(initial_message.encode())
+            tf.flush()
+            call([EDITOR, tf.name])
+
+            with open(tf.name, "r") as f:
+                post_message = f.read()
+
+    else:
+        if post:
+            post_message = post
+        else:
+            click.echo("Please input post content.")
+
+    mb = MessageBuilder(post_message)
+    built_message = mb.build()
+
     try:
         handler = KtistecHandler(ctx, current_profile)
-        handler.post(message, link)
+        handler.post(built_message)
     except Exception as e:
         click.echo(str(e), err=True)
         if debug:
