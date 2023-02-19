@@ -69,7 +69,7 @@ class TestKtistecHandler:
         target._get_csrf_token = mock.Mock()
         target._get_csrf_token.return_value = "beb886633614303dd2c5774a25a347ee"
 
-        target.post("test_message", [])
+        target.post("test_message")
 
         requests.assert_called_once_with(
             url="https://one.example.com/actors/test_user_one/outbox",
@@ -81,52 +81,6 @@ class TestKtistecHandler:
                 "type": "Publish",
                 "public": True,
                 "content": "<div>test_message</div>",
-                "authenticity_token": "beb886633614303dd2c5774a25a347ee",
-            },
-        )
-
-    @patch.object(Session, "post")
-    def test_post_success_with_one_link(self, requests, target):
-        target._login = mock.Mock()
-        target._get_csrf_token = mock.Mock()
-        target._get_csrf_token.return_value = "beb886633614303dd2c5774a25a347ee"
-
-        target.post("test_message", ["http://example.com"])
-
-        requests.assert_called_once_with(
-            url="https://one.example.com/actors/test_user_one/outbox",
-            headers={
-                "accept": "text/html",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            data={
-                "type": "Publish",
-                "public": True,
-                "content": '<div>test_message<br><a href="http://example.com">http://example.com</a></div>',
-                "authenticity_token": "beb886633614303dd2c5774a25a347ee",
-            },
-        )
-
-    @patch.object(Session, "post")
-    def test_post_success_with_two_link(self, requests, target):
-        target._login = mock.Mock()
-        target._get_csrf_token = mock.Mock()
-        target._get_csrf_token.return_value = "beb886633614303dd2c5774a25a347ee"
-
-        target.post(
-            "test_message", ["http://one.example.com", "http://two.example.com"]
-        )
-
-        requests.assert_called_once_with(
-            url="https://one.example.com/actors/test_user_one/outbox",
-            headers={
-                "accept": "text/html",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            data={
-                "type": "Publish",
-                "public": True,
-                "content": '<div>test_message<br><a href="http://one.example.com">http://one.example.com</a><br><a href="http://two.example.com">http://two.example.com</a></div>',
                 "authenticity_token": "beb886633614303dd2c5774a25a347ee",
             },
         )

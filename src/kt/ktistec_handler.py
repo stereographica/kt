@@ -59,10 +59,9 @@ class KtistecHandler:
         logger.debug(res.text)
         res.raise_for_status()
 
-    def post(self, message: str, link: list[str]) -> None:
+    def post(self, message: str) -> None:
         self._login()
         token = self._get_csrf_token(self._profile.server_url)
-        link_tags = "".join([f'<br><a href="{url}">{url}</a>' for url in link])
 
         res = self._session.post(
             url=f"{self._profile.server_url}/actors/{self._profile.user_name}/outbox",
@@ -70,11 +69,10 @@ class KtistecHandler:
             data={
                 "type": "Publish",
                 "public": True,
-                "content": f"<div>{message}{link_tags}</div>",
+                "content": f"<div>{message}</div>",
                 "authenticity_token": token,
             },
         )
-        logger.debug(f"<div>{message}{link_tags}</div>")
         logger.debug(res.status_code)
         logger.debug(res.text)
         res.raise_for_status()
