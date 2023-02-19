@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kt"
-version = "0.2.0"
+version = "0"
 description = ""
 authors = ["stereographica <stereographica@gmail.com>"]
 readme = "README.md"
@@ -22,10 +22,19 @@ black = "^22.12.0"
 isort = "^5.12.0"
 flake8 = "^6.0.0"
 types-requests = "^2.28.11.8"
+pytest = "^7.2.1"
+pytest-cov = "^4.0.0"
+requests-mock = "^1.10.0"
+mypy = "^1.0.1"
+types-toml = "^0.10.8.4"
+types-tabulate = "^0.9.0.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry-version-plugin]
+source = "git-tag"
 
 [tool.black]
 line-length = 80
